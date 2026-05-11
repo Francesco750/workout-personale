@@ -105,6 +105,14 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
   .stat:nth-child(2){border-right:none;}
   .stat:nth-child(3){border-right:1px solid var(--border);}
 }
+
+/* SERIES TRACKER */
+.set-tracker{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;}
+.set-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:none;cursor:pointer;transition:all .2s;position:relative;flex-shrink:0;}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 rgba(212,255,0,.5);}60%{box-shadow:0 0 0 5px rgba(212,255,0,.0);}}
+.set-dot.current{border-color:var(--accent);background:rgba(212,255,0,.12);animation:pulse-dot 1.6s ease-out infinite;}
+.set-dot.done{background:#3a3a3a;border-color:#3a3a3a;}
+.set-dot.done::after{content:'';position:absolute;inset:5px;border-radius:50%;background:#666;}
 </style>
 </head>
 <body>
@@ -601,6 +609,7 @@ function render(){
   const w=remaining<=10;
   n.classList.toggle('warn',w);
   p.classList.toggle('warn',w);
+  if(remaining===3||remaining===2||remaining===1)playBeep(700,.12,.3);
 }
 
 function flash(){
@@ -610,6 +619,8 @@ function flash(){
     o.style.background=c%2===0?'rgba(212,255,0,.1)':'rgba(0,0,0,.96)';
     if(++c>5)clearInterval(f);
   },220);
+  playBeep(1100,.22,.45);
+  setTimeout(()=>playBeep(1100,.32,.45),320);
 }
 
 function togglePause(){
@@ -625,6 +636,62 @@ function closeTimer(){
 document.getElementById('tmr').addEventListener('click',function(e){
   if(e.target===this)closeTimer();
 });
+
+/* ── AUDIO ── */
+let _actx=null;
+function _getCtx(){
+  if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();
+  if(_actx.state==='suspended')_actx.resume();
+  return _actx;
+}
+function playBeep(freq,dur,vol){
+  try{
+    const ctx=_getCtx();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.start();o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+
+/* ── SERIES TRACKER ── */
+function parseSets(ex){
+  const b=ex.querySelector('.badge-serie');
+  if(b){
+    const ms=[...(b.textContent.matchAll(/(\d+)\s*[×x]/gi))];
+    return ms.reduce((s,m)=>s+parseInt(m[1]),0);
+  }
+  if(ex.querySelector('.badge-tabata'))return 8;
+  return 0;
+}
+function refreshDots(wrap){
+  let found=false;
+  wrap.querySelectorAll('.set-dot').forEach(d=>{
+    d.classList.remove('current');
+    if(!found&&!d.classList.contains('done')){d.classList.add('current');found=true;}
+  });
+}
+function initTrackers(){
+  document.querySelectorAll('.ex').forEach(ex=>{
+    const n=parseSets(ex);
+    if(!n)return;
+    const wrap=document.createElement('div');
+    wrap.className='set-tracker';
+    for(let i=0;i<n;i++){
+      const b=document.createElement('button');
+      b.className='set-dot';
+      b.title=`Serie ${i+1}`;
+      b.setAttribute('aria-label',`Serie ${i+1}`);
+      b.onclick=e=>{e.stopPropagation();b.classList.toggle('done');refreshDots(wrap);};
+      wrap.appendChild(b);
+    }
+    ex.querySelector('.ex-meta').appendChild(wrap);
+    refreshDots(wrap);
+  });
+}
+initTrackers();
 </script>
 </body>
 </html>
