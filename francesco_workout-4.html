@@ -138,6 +138,101 @@ body.tmr-active .session.active{padding-bottom:88px;}
 </head>
 <body>
 
+<!-- PIN LOCK -->
+<div id="pin-overlay" style="
+  position:fixed;inset:0;z-index:9999;background:#0c0c0c;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'DM Sans',sans-serif;gap:0;
+">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:2px;color:#f2f2f2;margin-bottom:6px;">WORKOUT</div>
+  <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:48px;">Francesco D'Aniello</div>
+
+  <!-- dots -->
+  <div id="pin-dots" style="display:flex;gap:14px;margin-bottom:40px;">
+    <span class="pd"></span><span class="pd"></span><span class="pd"></span>
+    <span class="pd"></span><span class="pd"></span><span class="pd"></span><span class="pd"></span>
+  </div>
+
+  <!-- error msg -->
+  <div id="pin-err" style="font-size:12px;color:#ff4500;letter-spacing:1px;text-transform:uppercase;height:18px;margin-bottom:20px;"></div>
+
+  <!-- keypad -->
+  <div id="pin-pad" style="display:grid;grid-template-columns:repeat(3,72px);gap:12px;">
+    <button class="pk" data-n="1">1</button>
+    <button class="pk" data-n="2">2</button>
+    <button class="pk" data-n="3">3</button>
+    <button class="pk" data-n="4">4</button>
+    <button class="pk" data-n="5">5</button>
+    <button class="pk" data-n="6">6</button>
+    <button class="pk" data-n="7">7</button>
+    <button class="pk" data-n="8">8</button>
+    <button class="pk" data-n="9">9</button>
+    <button class="pk" data-n="del" style="font-size:18px;">⌫</button>
+    <button class="pk" data-n="0">0</button>
+    <button class="pk" data-n="ok" style="background:#d4ff00;color:#000;font-weight:700;">OK</button>
+  </div>
+</div>
+
+<style>
+.pd{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #444;background:transparent;transition:background .15s,border-color .15s;}
+.pd.filled{background:#d4ff00;border-color:#d4ff00;}
+.pd.err{background:#ff4500;border-color:#ff4500;}
+.pk{width:72px;height:72px;border-radius:50%;border:1px solid #272727;background:#161616;color:#f2f2f2;font-family:'DM Sans',sans-serif;font-size:22px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .1s;}
+.pk:active{background:#272727;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.shake{animation:shake .35s ease;}
+</style>
+
+<script>
+(function(){
+  const PIN = '9130283';
+  let entered = '';
+  const overlay = document.getElementById('pin-overlay');
+  const dots = document.querySelectorAll('.pd');
+  const err = document.getElementById('pin-err');
+
+  function updateDots(){
+    dots.forEach((d,i)=>{
+      d.classList.toggle('filled', i < entered.length);
+      d.classList.remove('err');
+    });
+  }
+
+  function shake(){
+    dots.forEach(d=>{d.classList.add('err');d.classList.remove('filled');});
+    document.getElementById('pin-dots').classList.add('shake');
+    err.textContent = 'PIN errato';
+    setTimeout(()=>{
+      document.getElementById('pin-dots').classList.remove('shake');
+      dots.forEach(d=>d.classList.remove('err'));
+      err.textContent='';
+      entered='';
+      updateDots();
+    },600);
+  }
+
+  function tryUnlock(){
+    if(entered === PIN){
+      overlay.style.transition='opacity .3s';
+      overlay.style.opacity='0';
+      setTimeout(()=>overlay.remove(),300);
+    } else {
+      shake();
+    }
+  }
+
+  document.getElementById('pin-pad').addEventListener('click',e=>{
+    const btn = e.target.closest('.pk');
+    if(!btn) return;
+    const n = btn.dataset.n;
+    if(n==='del'){ entered=entered.slice(0,-1); err.textContent=''; updateDots(); }
+    else if(n==='ok'){ tryUnlock(); }
+    else if(entered.length < PIN.length){ entered+=n; updateDots(); if(entered.length===PIN.length) tryUnlock(); }
+  });
+})();
+</script>
+<!-- /PIN LOCK -->
+
 <!-- TIMER BAR -->
 <div id="tmr-bar">
   <div class="tbar-ring">
