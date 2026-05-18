@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(gh auth *)",
+      "Bash(gh repo *)",
+      "Bash(Copy-Item *)",
+      "Bash(Remove-Item *)",
+      "PowerShell(gh api *)"
+    ]
+  }
+}

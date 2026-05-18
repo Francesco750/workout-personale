@@ -2,7 +2,7 @@
   "name": "Workout — Francesco D'Aniello",
   "short_name": "Workout",
   "description": "Scheda allenamento personale",
-  "start_url": "francesco_workout-4.html",
+  "start_url": "francesco_workout.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0c0c0c",
