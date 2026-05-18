@@ -6,7 +6,8 @@
       "Bash(gh repo *)",
       "Bash(Copy-Item *)",
       "Bash(Remove-Item *)",
-      "PowerShell(gh api *)"
+      "PowerShell(gh api *)",
+      "WebFetch(domain:francesco750.github.io)"
     ]
   }
 }
