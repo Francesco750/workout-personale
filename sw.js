@@ -1,6 +1,6 @@
-const CACHE = 'workout-v4';
+const CACHE = 'workout-v5';
 const ASSETS = [
-  'francesco_workout-4.html',
+  'francesco_workout-5.html',
   'manifest.json',
   'icon.svg'
 ];
